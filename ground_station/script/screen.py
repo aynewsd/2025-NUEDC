@@ -1,5 +1,6 @@
 import serial #导入模块
 import time
+from route import route as build_route
 
 class Post:
     def __init__(self) -> None:
@@ -19,6 +20,9 @@ class point:
     def __init__(self,x:int,y:int) -> None:
         self.x=x
         self.y=y
+    def __add__(self,other):
+        return point(self.x+other.x,self.y+other.y)
+    def __
 
 class Data:
     def __init__(self,xiang:int,hu:int,lang:int,hou:int,que:int):
@@ -95,7 +99,11 @@ def init():
 def generate_path():
     global path
     #生成路径
-    pass
+    if(len(obs)!=3):
+        return -1
+    o1,o2,o3=obs[1],obs[2],obs[3]
+    ret = build_route(o1.x,o2.x,o3.x,o1.y,o2.y,o3.y)
+    path=[point(p.x,p.y) for p in ret]
     #发送路径给机载电脑
     pass
 

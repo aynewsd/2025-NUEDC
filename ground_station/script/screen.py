@@ -66,7 +66,8 @@ def main():
                     #检测生成路径
                     if(len(obs)==3):
                         #print(obs)
-                        generate_path()
+                        generate_path()# 生成路径，显示路径，将路径发送给机载电脑
+                        draw_path()
 
                 elif(ubuffer[1] == 0x02):
                     x:int=ubuffer[2]
@@ -83,9 +84,9 @@ def main():
                 # 删除最前面的1个数据
                 del ubuffer[0]
         
-        #绘制路径，绘制无人机位置，刷新文本信息
+        #绘制无人机位置，刷新文本信息
         draw()
-        time.sleep(0.25)
+        time.sleep(0.1)
 
 
 
@@ -102,6 +103,7 @@ def init():
     # 初始化串口后，立即清空缓冲区
     post.ser.reset_input_buffer()
     post.ser.reset_output_buffer()
+    post.write("page 1")
 
 def generate_path():
     global path
@@ -129,8 +131,6 @@ def generate_path():
 def draw():
     #post.write("ref s0")
     if(len(path)!=0):
-        #绘制路径
-        draw_path()
         #绘制无人机位置
         draw_drone()
 
@@ -159,16 +159,21 @@ def draw_txt():
 def draw_drone():
     global current_position
     if(current_position[0]>45):
-        current_position[0]=current_position[0]-1.0
+        current_position[0]=current_position[0]-2.0
         string="p1.x={}".format(int(current_position[0]))
         post.write(string)
 
 def draw_path():
+    post.write("page 0")
     for i in range(9):
         for j in range(7):
             if(point(i,j) in obs):
                 continue
             post.write(txt_matrix[i][j])
+    post.write("page 1")
+    post.write("ref t1")
+    post.write("ref t2")
+    post.write("ref t3")
 
 if __name__=="__main__":
     main()

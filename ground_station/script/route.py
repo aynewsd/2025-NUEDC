@@ -8,7 +8,7 @@ class dir:
     right=point(1,0)
 
 def route(obs_:list[point]) -> list[point]:
-    obs:list[point]=[point(8-i.x,i.y) for i in obs_]# 坐标系翻折
+    obs:list[point]=[point(8-i.x,6-i.y) for i in obs_]# 坐标系翻折
     path:list[point]=[]
     reverse_tag=0 # 不翻转 9*7 1:翻转 7*9
     back_tag=0 # 返回路径 0:下左, 1:左下
@@ -26,8 +26,9 @@ def route(obs_:list[point]) -> list[point]:
         if(reverse_tag):# 坐标系翻转
             pt.x,pt.y=pt.y,pt.x
         pt.x=8-pt.x# 坐标系翻折(起点坐标从(0,0)映射回(8,0))
+        pt.y=6-pt.y
         path.append(pt)
-        print(pt)
+        #print(pt)
     
     def rev(pt:point):
         return point(-pt.x,-pt.y)

@@ -8,3 +8,11 @@ class point:
         return self.x==other.x and self.y==other.y
     def __repr__(self):
         return f"Point(x={self.x}, y={self.y})"
+    
+class Data:
+    def __init__(self,xiang:int,hu:int,lang:int,hou:int,que:int):
+        self.xiang=xiang
+        self.hu=hu
+        self.lang=lang
+        self.hou=hou
+        self.que=que

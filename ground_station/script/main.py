@@ -1,5 +1,8 @@
 import serial #导入模块
 import time
+import threading
+from client import Client
+import json
 from route import route as build_route
 from Class import *
 class Post:
@@ -15,14 +18,6 @@ class Post:
     def print_end(self):
         self.ser.write(bytes.fromhex('ff ff ff'))
 
-class Data:
-    def __init__(self,xiang:int,hu:int,lang:int,hou:int,que:int):
-        self.xiang=xiang
-        self.hu=hu
-        self.lang=lang
-        self.hou=hou
-        self.que=que
-
 # ubuffer用于存放串口数据
 ubuffer = bytearray()
 FRAME_LENGTH:int=9
@@ -35,15 +30,21 @@ path_matrix:list[list[list[int]]]
 txt_matrix:list[list[str]]
 # 动物数据
 animal:list[list[Data]]=[]
-total_animal:Data
 # 与屏幕通信
 post:Post
 current_block:point=point(0,0)# 当前选择查看信息的格子
 # 与机载电脑通信
-current_position:list[float]=[455.0,365.0]# 当前飞机位置
-
+# 增加锁
+data_lock = threading.Lock()
+# 共享数据容器，方便传递给client
+shared_data = {
+    "position": [455.0, 365.0],  # 初始默认值
+    "animal": None,  # 将在init中创建
+    "total_animal": None
+}
+comm_client:Client
 def main():
-    global total_animal,post,current_block,current_position,ubuffer
+    global post,current_block,ubuffer
     init()
     while True:
         # 如果串口有数据，全部存放入ubuffer
@@ -91,19 +92,26 @@ def main():
 
 
 def init():
-    global post,animal,total_animal,path_matrix,txt_matrix
+    global post,animal,path_matrix,txt_matrix,comm_client
     post=Post()
     for i in range(0,9):
         animal.append([])
         for j in range(0,7):
             animal[i].append(Data(0,0,0,0,0))
-    total_animal=Data(0,0,0,0,0)
     path_matrix = [[[] for _ in range(7)] for _ in range(9)]
     txt_matrix = [["" for _ in range(7)] for _ in range(9)]
     # 初始化串口后，立即清空缓冲区
     post.ser.reset_input_buffer()
     post.ser.reset_output_buffer()
     post.write("page 1")
+     # 初始化共享数据
+    shared_data["animal"] = animal
+    shared_data["total_animal"] = Data(0,0,0,0,0)
+    # 启动client（服务器IP和端口请根据实际情况填写）
+    client = Client("192.168.1.100", 8888, shared_data, data_lock)
+    client.start()
+    # 将client保存到全局或某个地方，以便发送路径
+    comm_client = client
 
 def generate_path():
     global path
@@ -126,7 +134,8 @@ def generate_path():
             #print(path_str)
             txt_matrix[i][j]="xstr {},{},40,40,1,0,0,0,0,3,\"{}\"".format(x,y,path_str)  # 示例:xstr 32,52,40,40,1,0,0,0,0,3,"1,12,7"
     #发送路径给机载电脑
-    pass
+    if comm_client:
+        comm_client.send_path(path)
 
 def draw():
     #post.write("ref s0")
@@ -139,11 +148,12 @@ def draw():
     
 
 def draw_txt():
+    with data_lock:
+        cur = shared_data["animal"][current_block.x][current_block.y]
+        tot = shared_data["total_animal"]
     s1="A"+str(current_block.x)
     s2="B"+str(6-current_block.y)
     #print(s1+s2)
-    cur=animal[current_block.x][current_block.y]
-    tot=total_animal
     string="t0.txt=\"当前选定块:{}{}\r\n\
     象:{} 虎:{}\r\n\
     狼:{} 猴:{}\r\n\
@@ -157,10 +167,12 @@ def draw_txt():
     post.write(string)
 
 def draw_drone():
-    global current_position
-    if(current_position[0]>45):
-        current_position[0]=current_position[0]-2.0
-        string="p1.x={}".format(int(current_position[0]))
+    with data_lock:
+        pos = shared_data["position"]
+        # 如果距离上次位置有变化，更新屏幕
+        string = "p1.x={}".format(int(pos[0]))
+        post.write(string)
+        string = "p1.y={}".format(int(pos[1]))
         post.write(string)
 
 def draw_path():

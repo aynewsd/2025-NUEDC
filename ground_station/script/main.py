@@ -31,7 +31,7 @@ txt_matrix:list[list[str]]
 # 动物数据
 animal:list[list[Data]]=[]
 # 与屏幕通信
-post:Post
+post:Post=None
 current_block:point=point(0,0)# 当前选择查看信息的格子
 # 与机载电脑通信
 # 增加锁
@@ -43,6 +43,7 @@ shared_data = {
     "total_animal": None
 }
 comm_client:Client
+server_connected:bool=False
 def main():
     global post,current_block,ubuffer
     init()
@@ -103,12 +104,12 @@ def init():
     # 初始化串口后，立即清空缓冲区
     post.ser.reset_input_buffer()
     post.ser.reset_output_buffer()
-    post.write("page 1")
+    #post.write("page 1") 改为连接到server后page 1
      # 初始化共享数据
     shared_data["animal"] = animal
     shared_data["total_animal"] = Data(0,0,0,0,0)
     # 启动client（服务器IP和端口请根据实际情况填写）
-    client = Client("192.168.1.100", 8888, shared_data, data_lock)
+    client = Client("127.0.0.1", 8888, shared_data, data_lock, on_connect=handle_client_connected)
     client.start()
     # 将client保存到全局或某个地方，以便发送路径
     comm_client = client
@@ -186,6 +187,13 @@ def draw_path():
     post.write("ref t1")
     post.write("ref t2")
     post.write("ref t3")
+
+def handle_client_connected():
+    global server_connected
+    if not server_connected:
+        server_connected = True
+        post.write("page 1")
+    
 
 if __name__=="__main__":
     main()

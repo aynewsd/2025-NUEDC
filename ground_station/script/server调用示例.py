@@ -28,7 +28,7 @@ def main():
     # 2. 启动服务器（在后台线程监听）
     server.start()
     print("机载服务器已启动，等待地面站连接...")
-    
+    x,y=get_current_position()
     # 3. 主循环：模拟周期发送数据
     try:
         while True:
@@ -36,8 +36,10 @@ def main():
             time.sleep(1)
             
             # 获取当前位置
-            x, y = get_current_position()
+            #x, y = get_current_position()
             # 发送位置
+            x-=10
+            y-=10
             server.send_position(x, y)
             
             # 可选：发送所有格子的数据（或只发送变化的格子）

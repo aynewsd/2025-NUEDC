@@ -1,1 +1,29 @@
+# 1. 日志文件（所有目录下的 .log）
 **/*.log
+
+# 2. ROS 编译产物（catkin_make 生成的 build/devel）
+**/build/
+**/devel/
+**/install/  # 补充：ROS noetic 等版本可能生成 install 目录
+
+# 3. 隐藏文件/文件夹（精准忽略，避免误删）
+# 忽略 .catkin_tools（catkin_tools 编译工具产物）
+**/.catkin_tools/
+# 忽略 .vscode（VSCode 配置，若不需要提交）
+**/.vscode/
+# 忽略 .idea（PyCharm 配置，若不需要提交）
+**/.idea/
+# 忽略 .cache（缓存文件）
+**/.cache/
+# 忽略 .DS_Store（Mac 系统文件）
+**/.DS_Store
+
+# 4. 补充：ROS 常见无用文件（可选）
+# 忽略 Python 编译缓存
+**/__pycache__/
+**/*.pyc
+# 忽略 C++ 编译临时文件
+**/*.o
+**/*.so
+# 忽略 ROS 袋文件（若有）
+**/*.bag

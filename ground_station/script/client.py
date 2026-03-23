@@ -123,9 +123,9 @@ class Client:
             msg_type = msg.get("type")
             with self.lock:
                 if msg_type == "position":
-                    self.shared_data["position"] = (msg["x"], msg["y"])
+                    self.shared_data["position"] = (8-2*msg["x"],6-2*msg["y"])
                 elif msg_type == "cell":
-                    x, y = msg["x"], msg["y"]
+                    x, y = 8-int(round(msg["x"]*2)), 6-int(round(msg["y"]))
                     data = msg["data"]
                     if 0 <= x < 9 and 0 <= y < 7:
                         self.shared_data["animal"][x][y] = Data(*data)

@@ -43,7 +43,7 @@ post: Post = None
 current_block: point = point(0, 0)
 data_lock = threading.Lock()
 shared_data = {
-    "position": [455.0, 365.0],
+    "position": [445.0, 365.0],
     "animal": None,
     "total_animal": None,
 }
@@ -185,6 +185,7 @@ def generate_path():
             path_str = ",".join([str(num) for num in path_matrix[i][j]])
             txt_matrix[i][j] = 'xstr {},{},40,40,1,0,0,0,0,3,"{}"'.format(x, y, path_str)
     if comm_client:
+        _path=[point((8-p.x)*0.5,(6-p.y)*0.5) for p in path]
         comm_client.send_path(path)
 
 
@@ -227,6 +228,8 @@ def draw_txt():
 def draw_drone():
     with data_lock:
         pos = shared_data["position"]
+        pos[0]=30+int(round(pos[0]*50))-10+25
+        pos[1]=50+int(round(pos[1]*50))-10+25#将坐标映射到网格{(30,50),(500,380)}的坐标转换
         post.write("p1.x={}".format(int(pos[0])))
         post.write("p1.y={}".format(int(pos[1])))
 

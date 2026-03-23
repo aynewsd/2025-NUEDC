@@ -25,8 +25,8 @@ def route(obs_:list[point]) -> list[point]:
             pt=point(cur.x,cur.y)
         if(reverse_tag):# 坐标系翻转
             pt.x,pt.y=pt.y,pt.x
-        pt.x=8-pt.x# 坐标系翻折(起点坐标从(0,0)映射回(8,0))
-        pt.y=6-pt.y
+        pt.x=8-pt.x
+        pt.y=6-pt.y# 坐标系翻折(起点坐标从(0,0)映射回(8,6))
         path.append(pt)
         #print(pt)
     

@@ -1,5 +1,5 @@
 class point:
-    def __init__(self,x:int,y:int) -> None:
+    def __init__(self,x,y) -> None:
         self.x=x
         self.y=y
     def __add__(self,other):
